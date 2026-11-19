@@ -1,53 +1,28 @@
-# Telepathy
+# Telepathy — Grace entity receptor
 
-**Telepathy** is AGi's shared ROS 2 package for the Web Teleops Console and the transport between the browser interface and an AGi system.
+The ROS package `telepathy_receptor` receives `cryptic_signal_core/msg/TelepathicSignal`
+on `/telepathic/stimulus`, decodes it with Cypher through Grace's scheme registry,
+and invokes the Interactive conversation engine. It publishes JSON stream events
+as `std_msgs/String` on `/telepathic/response`.
 
-It provides the `telepathic_management` ROS 2 package and the `telepathic_console` executable. The console serves the shared WebUI and connects to rosbridge. AIVA's chat adapter accepts typed `TelepathicSignal` messages on `/telepathic/stimulus` and plain WebUI chat on `/aiva/chat_input`. AuRoRA's TIC is a separate component in its own runtime.
+The external WebUI lives in [Console](https://github.com/AGi-robot/console).
+Console encodes the prompt before publishing; Grace decodes it here. The current
+`ternary_utf8_v1` codec is reversible encoding, not encryption.
 
-The console's intrinsic settings API reads and writes AuRoRA's `aurora.yaml`
-through its `hrs` package; it requires that package to be available to the
-console. These settings are applied by AuRoRA's launch and do not configure
-AIVA's `aiva_chat` adapter. The settings API fails in an AIVA-only environment
-that does not provide `hrs`.
+Decoded input accepts plain text or a JSON object containing `text`, `identifier`,
+`web_search`, and optional Canvas metadata. The old `/aiva/chat_input` subscription
+is removed. Canvas snapshots retain their separate `/aiva/canvas_snapshot` topic.
 
-The `telepathic_console` executable is a standalone web server packaged in a
-ROS 2 package so it can be installed and launched with `ros2 run`. It is not a
-ROS node: it communicates with ROS through the rosbridge WebSocket API and does
-not create an `rclpy` node.
+The receptor currently also hosts the migrated Grace memory adapter and Canvas
+orchestration. Interactive and Memory remain imported libraries, not ROS nodes.
+Recent context defaults to eight exchanges; completed exchanges persist in SQLite.
 
-## Repository contents
+## Runtime setup
 
-This repository is a ROS 2 workspace package at its root. It includes the console backend, frontend, Canvas Studio host UI, and package-level checks.
+Check out Telepathy beside Shell and link `shell/src/telepathy_receptor` to
+`../../telepathy`. Shell provides `aiva_cryptic_signal_core`; Cypher provides the
+message and codec. Install Interactive, Memory, Canvas and Imaging in the runtime
+venv. Build with colcon and run `ros2 run telepathy_receptor telepathy_receptor`.
 
-## Requirements
-
-- ROS 2 Jazzy
-- `cryptic_signal_core` from [AGi-Robot/cypher](https://github.com/AGi-robot/cypher)
-- rosbridge running at `ws://127.0.0.1:9090` by default
-- Python dependencies declared in `package.xml` and `setup.py`
-
-## Install in an assistant workspace
-
-Clone Telepathy and Cypher beside the assistant repository, then link both packages into that workspace's `src` directory. From the workspace root:
-
-```sh
-git clone https://github.com/AGi-robot/telepathy.git ../telepathy
-git clone https://github.com/AGi-robot/cypher.git ../cypher
-ln -s ../../cypher src/cryptic_signal_core
-ln -s ../../telepathy src/telepathic_management
-```
-
-The repository provides the shared input and UI transport. Assistant-specific chat, memory, and TIC behavior remain in each assistant repository. Build it with the assistant's ROS packages:
-
-```sh
-source /opt/ros/jazzy/setup.bash
-colcon build --packages-up-to telepathic_management
-source install/setup.bash
-ros2 run telepathic_management telepathic_console
-```
-
-Set `AGI_ROSBRIDGE_URL` to use a different rosbridge WebSocket URL. Set `AGI_WEB_TELEOPS_CONSOLE_INTERFACE_DIR` to override the bundled interface directory. Canvas drawing language and SVG rendering are provided by [Grace Canvas](https://github.com/AGi-robot/canvas).
-
-## License
-
-Telepathy is licensed under **AGPL-3.0-only**. See [LICENSE](LICENSE). The Grace avatar assets have separate terms documented in [`telepathic_management/telepathic_console/backend/static/assets/README.md`](telepathic_management/telepathic_console/backend/static/assets/README.md).
+The migrated entity source retains its GPL-3.0-only license (`LICENSE.inherited`);
+the repository's existing AGPL license is retained for its prior history.
