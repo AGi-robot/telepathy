@@ -1,8 +1,6 @@
 import json
 from unittest.mock import Mock
 
-import httpx
-import pytest
 
 from telepathy_receptor import node as chat_node
 from telepathy_receptor.memory import GraceMemory
