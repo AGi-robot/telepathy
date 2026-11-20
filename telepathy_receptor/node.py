@@ -292,8 +292,19 @@ class TelepathyReceptor(Node):
         self._on_webui_input(message)
 
     def _publish(self, event: dict) -> None:
+        """Encode text content while preserving the response event envelope."""
+        wire_event = dict(event)
+        content = wire_event.get("content")
+        if isinstance(content, str):
+            wire_event.pop("content")
+            signal, pulse = self._cryptic.encode(content)
+            wire_event["content_signal"] = {
+                "signal": list(signal),
+                "pulse": pulse,
+                "scheme": self._cryptic.default_scheme(),
+            }
         message = String()
-        message.data = json.dumps(event, ensure_ascii=False)
+        message.data = json.dumps(wire_event, ensure_ascii=False, separators=(",", ":"))
         self._response_pub.publish(message)
 
     def _answer(self, text: str, identifier: str) -> None:

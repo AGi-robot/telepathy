@@ -3,11 +3,15 @@
 The ROS package `telepathy_receptor` receives `cryptic_signal_core/msg/TelepathicSignal`
 on `/telepathic/stimulus`, decodes it with Cypher through Grace's scheme registry,
 and invokes the Interactive conversation engine. It publishes JSON stream events
-as `std_msgs/String` on `/telepathic/response`.
+on `/telepathic/response` as `std_msgs/String`. Text content is Cypher-encoded
+inside each event; Console decodes it after rosbridge delivers the event.
 
 The external WebUI lives in [Console](https://github.com/AGi-robot/console).
-Console encodes the prompt before publishing; Grace decodes it here. The current
-`ternary_utf8_v1` codec is reversible encoding, not encryption.
+Console encodes the prompt before publishing; Grace decodes it here. Grace
+encodes each response event's text content before publishing; Console restores
+that content after rosbridge. Event types, IDs, and other structured fields
+remain in the JSON envelope. The current `ternary_utf8_v1` codec is reversible
+encoding, not encryption.
 
 Decoded input accepts plain text or a JSON object containing `text`, `identifier`,
 `web_search`, and optional Canvas metadata. The old `/aiva/chat_input` subscription
