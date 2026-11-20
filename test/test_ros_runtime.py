@@ -60,7 +60,16 @@ def test_chat_input_topics_and_response_topic_on_ros_graph(tmp_path, monkeypatch
         submitted.set()
 
     node._pool.submit = capture_prompt
-    node.create_subscription(String, "/telepathic/response", lambda msg: response_events.append(json.loads(msg.data)), 10)
+    def capture_response(message):
+        wire_event = json.loads(message.data)
+        encoded = wire_event.pop("content_signal", None)
+        if encoded is not None:
+            wire_event["content"] = node._cryptic.decode(
+                bytes(encoded["signal"]), int(encoded["pulse"]), encoded["scheme"]
+            )
+        response_events.append(wire_event)
+
+    node.create_subscription(String, "/telepathic/response", capture_response, 10)
     signal_publisher = node.create_publisher(TelepathicSignal, "/telepathic/stimulus", 10)
 
     try:
