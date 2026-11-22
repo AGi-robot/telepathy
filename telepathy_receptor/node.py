@@ -21,6 +21,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from ament_index_python.packages import get_package_share_directory
 
+from .identity import load_identity, render_soul
 from .memory import GraceMemory
 from .moss import MossClient, paint_size
 from .drawing import (DRAW_INSTRUCTIONS, PAINT_INSTRUCTIONS, validate_actions,
@@ -29,19 +30,21 @@ from .drawing import (DRAW_INSTRUCTIONS, PAINT_INSTRUCTIONS, validate_actions,
 
 
 def _load_soul() -> str:
-    """Load AIVA's packaged soul, with a source-workspace fallback."""
-    candidates = []
+    """Load the soul template with the shared companion identity applied."""
     try:
-        candidates.append(Path(get_package_share_directory("telepathy_receptor")) / "persona" / "SOUL.md")
-    except Exception:
-        pass
-    candidates.append(Path(__file__).resolve().parents[1] / "persona" / "SOUL.md")
-    for path in candidates:
+        candidates = []
         try:
-            return path.read_text(encoding="utf-8").strip()
-        except OSError:
-            continue
-    return "You are Grace, AIVA's thoughtful and helpful companion."
+            candidates.append(Path(get_package_share_directory("telepathy_receptor")) / "persona" / "SOUL.md")
+        except Exception:
+            pass
+        candidates.append(Path(__file__).resolve().parents[1] / "persona" / "SOUL.md")
+        for path in candidates:
+            if path.is_file():
+                return render_soul(path)
+    except (OSError, ValueError) as error:
+        # Keep the receptor available even if an identity/template edit is malformed.
+        print(f"Could not render companion soul: {error}")
+    return f"You are {load_identity()['name']}, AIVA's thoughtful and helpful companion."
 
 
 def _append_user_content(messages, addition) -> None:
