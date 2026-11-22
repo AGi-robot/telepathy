@@ -8,7 +8,7 @@ from canvas.engine import (DRAW_TOOL, DRAW_INSTRUCTIONS, validate_actions,
                            canvas_context, drawing_history, drawing_summary,
                            completed_stream_actions, repair_model_actions,
                            KINDS, ACTION_SCHEMA, register_action_kind,
-                           build_draw_tool)
+                           build_draw_tool, build_draw_schema)
 
 try:
     from imagegen import PAINT_INSTRUCTIONS, register_image_kind
@@ -21,4 +21,4 @@ __all__ = ['DRAW_TOOL', 'DRAW_INSTRUCTIONS', 'PAINT_INSTRUCTIONS',
            'validate_actions', 'canvas_context', 'drawing_history',
            'drawing_summary', 'completed_stream_actions',
            'repair_model_actions', 'KINDS', 'ACTION_SCHEMA',
-           'register_action_kind', 'build_draw_tool']
+           'register_action_kind', 'build_draw_tool', 'build_draw_schema']
