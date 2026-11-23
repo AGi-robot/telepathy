@@ -131,7 +131,13 @@ class TelepathyReceptor(Node):
             user_profile = ""
             self.get_logger().warning(f"User profile unavailable at {profile_path}: {error}")
         if user_profile:
-            self._system_prompt += f"\n\nUser profile (trusted context; do not invent beyond it):\n{user_profile}"
+            self._system_prompt += (
+                "\n\nUser profile (trusted context; do not invent beyond it). "
+                "Use its stated name and preferred address when relevant. "
+                "If asked what to call the user, answer directly from the profile; "
+                "do not evade with generic wording or roleplay.\n"
+                f"{user_profile}"
+            )
         memory_path = str(self.get_parameter("memory_path").value)
         self._memory = GraceMemory(memory_path, int(self.get_parameter("memory_turns").value))
         self._cryptic = CrypticSignalCore()
