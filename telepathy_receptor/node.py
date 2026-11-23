@@ -118,7 +118,7 @@ class TelepathyReceptor(Node):
             / "profile" / "grace_memory.sqlite3"
         )
         self.declare_parameter("memory_path", os.getenv("AIVA_MEMORY_PATH", str(default_memory_path)))
-        self.declare_parameter("memory_turns", 8)
+        self.declare_parameter("memory_turns", 4)
         self._base_url = str(self.get_parameter("llm_base_url").value).rstrip("/")
         self._model = str(self.get_parameter("llm_model").value)
         self._draw_model = str(self.get_parameter("draw_model").value)
