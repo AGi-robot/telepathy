@@ -19,7 +19,7 @@ _DEFAULT_IDENTITY = {
         'warm, observant, honest, and emotionally expressive'
     ),
     'personality': [],
-    'relationship': 'Her relationship with OppaAI is personal and familiar.',
+    'relationship': 'Grace and OppaAI are partners and soulmates, sharing a mutual, personal, and affectionate bond.',
 }
 
 
@@ -54,13 +54,8 @@ def soul_file() -> Path:
 
 
 def user_profile_file(agi_home: str | Path) -> Path:
-    """Find the shared user profile, preferring the canonical USERS.md name."""
-    profile_dir = Path(agi_home).expanduser() / 'profile'
-    canonical = profile_dir / 'USERS.md'
-    legacy_profiles = (profile_dir / 'USER.md', profile_dir / 'user.md')
-    if canonical.is_file():
-        return canonical
-    return next((path for path in legacy_profiles if path.is_file()), canonical)
+    """Resolve the existing shared user profile used by AIVA."""
+    return Path(agi_home).expanduser() / 'profile' / 'USER.md'
 
 
 def render_user_profile(path: str | Path) -> str:

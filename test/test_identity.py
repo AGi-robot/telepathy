@@ -9,6 +9,8 @@ def test_identity_yaml_drives_soul_and_ui_fields():
 
     assert configured['name'] == 'Grace'
     assert configured['tagline'] == 'Talk, reflect, and be understood.'
+    assert 'partners and soulmates' in configured['relationship']
+    assert 'stays because she chooses' not in configured['relationship']
     assert "You are Grace, OppaAI's local AI companion" in soul
     assert 'Aiko' not in soul
     assert '${name}' not in soul
@@ -31,33 +33,13 @@ def test_soul_interpolates_a_custom_identity_file(monkeypatch, tmp_path):
     assert '${' not in soul
 
 
-def test_user_profile_prefers_canonical_users_markdown(tmp_path):
+def test_user_profile_uses_existing_user_markdown(tmp_path):
     profile_dir = tmp_path / 'profile'
     profile_dir.mkdir()
-    legacy = profile_dir / 'user.md'
-    canonical = profile_dir / 'USERS.md'
-    legacy.write_text('legacy profile', encoding='utf-8')
+    canonical = profile_dir / 'USER.md'
     canonical.write_text('shared profile', encoding='utf-8')
 
     assert identity.user_profile_file(tmp_path) == canonical
-
-
-def test_user_profile_falls_back_to_existing_legacy_markdown(tmp_path):
-    profile_dir = tmp_path / 'profile'
-    profile_dir.mkdir()
-    legacy = profile_dir / 'USER.md'
-    legacy.write_text('legacy profile', encoding='utf-8')
-
-    assert identity.user_profile_file(tmp_path) == legacy
-
-
-def test_user_profile_falls_back_to_lowercase_legacy_markdown(tmp_path):
-    profile_dir = tmp_path / 'profile'
-    profile_dir.mkdir()
-    legacy = profile_dir / 'user.md'
-    legacy.write_text('legacy profile', encoding='utf-8')
-
-    assert identity.user_profile_file(tmp_path) == legacy
 
 
 def test_user_profile_renders_shared_companion_name(tmp_path, monkeypatch):
