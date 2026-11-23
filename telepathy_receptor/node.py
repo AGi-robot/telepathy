@@ -105,7 +105,7 @@ class TelepathyReceptor(Node):
         self.declare_parameter("llm_base_url", os.getenv("AIVA_LLM_BASE_URL", "http://127.0.0.1:8080/v1"))
         self.declare_parameter(
             "llm_model",
-            os.getenv("AIVA_LLM_MODEL", "ministral-3-8b-uncensored"),
+            os.getenv("AIVA_LLM_MODEL", "ministral-3-8b-instruct-2512-abliterated"),
         )
         self.declare_parameter(
             "draw_model",
