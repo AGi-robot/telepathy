@@ -21,7 +21,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from ament_index_python.packages import get_package_share_directory
 
-from .identity import load_identity, render_soul
+from .identity import load_identity, render_soul, render_user_profile, user_profile_file
 from .memory import GraceMemory
 from .moss import MossClient, paint_size
 from .drawing import (DRAW_INSTRUCTIONS, PAINT_INSTRUCTIONS, validate_actions,
@@ -124,9 +124,9 @@ class TelepathyReceptor(Node):
         self._draw_model = str(self.get_parameter("draw_model").value)
         self._draw_max_tokens = max(1, int(os.getenv("AIVA_DRAW_MAX_TOKENS", "6144")))
         self._system_prompt = str(self.get_parameter("system_prompt").value)
-        profile_path = Path(str(self.get_parameter("agi_home").value)).expanduser() / "profile" / "user.md"
+        profile_path = user_profile_file(str(self.get_parameter("agi_home").value))
         try:
-            user_profile = profile_path.read_text(encoding="utf-8").strip()
+            user_profile = render_user_profile(profile_path)
         except OSError as error:
             user_profile = ""
             self.get_logger().warning(f"User profile unavailable at {profile_path}: {error}")

@@ -53,6 +53,22 @@ def soul_file() -> Path:
     return Path(__file__).resolve().parents[1] / 'persona' / 'SOUL.md'
 
 
+def user_profile_file(agi_home: str | Path) -> Path:
+    """Find the shared user profile, preferring the canonical USERS.md name."""
+    profile_dir = Path(agi_home).expanduser() / 'profile'
+    canonical = profile_dir / 'USERS.md'
+    legacy_profiles = (profile_dir / 'USER.md', profile_dir / 'user.md')
+    if canonical.is_file():
+        return canonical
+    return next((path for path in legacy_profiles if path.is_file()), canonical)
+
+
+def render_user_profile(path: str | Path) -> str:
+    """Load trusted user notes and interpolate the shared companion identity."""
+    template = Path(path).expanduser().read_text(encoding='utf-8').strip()
+    return Template(template).safe_substitute(load_identity())
+
+
 def load_identity() -> dict:
     """Return validated public identity fields with safe defaults."""
     identity = dict(_DEFAULT_IDENTITY)

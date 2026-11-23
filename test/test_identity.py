@@ -29,3 +29,40 @@ def test_soul_interpolates_a_custom_identity_file(monkeypatch, tmp_path):
     assert "You are Robin, OppaAI's local AI companion" in soul
     assert 'Be Robin first' in soul
     assert '${' not in soul
+
+
+def test_user_profile_prefers_canonical_users_markdown(tmp_path):
+    profile_dir = tmp_path / 'profile'
+    profile_dir.mkdir()
+    legacy = profile_dir / 'user.md'
+    canonical = profile_dir / 'USERS.md'
+    legacy.write_text('legacy profile', encoding='utf-8')
+    canonical.write_text('shared profile', encoding='utf-8')
+
+    assert identity.user_profile_file(tmp_path) == canonical
+
+
+def test_user_profile_falls_back_to_existing_legacy_markdown(tmp_path):
+    profile_dir = tmp_path / 'profile'
+    profile_dir.mkdir()
+    legacy = profile_dir / 'USER.md'
+    legacy.write_text('legacy profile', encoding='utf-8')
+
+    assert identity.user_profile_file(tmp_path) == legacy
+
+
+def test_user_profile_falls_back_to_lowercase_legacy_markdown(tmp_path):
+    profile_dir = tmp_path / 'profile'
+    profile_dir.mkdir()
+    legacy = profile_dir / 'user.md'
+    legacy.write_text('legacy profile', encoding='utf-8')
+
+    assert identity.user_profile_file(tmp_path) == legacy
+
+
+def test_user_profile_renders_shared_companion_name(tmp_path, monkeypatch):
+    profile = tmp_path / 'USERS.md'
+    profile.write_text('Relationship to $name: creator.\n', encoding='utf-8')
+    monkeypatch.setattr(identity, 'load_identity', lambda: {'name': 'Grace'})
+
+    assert identity.render_user_profile(profile) == 'Relationship to Grace: creator.'
