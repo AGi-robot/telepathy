@@ -32,6 +32,7 @@ def make_node(tmp_path):
     node._base_url = "http://llm.test/v1"
     node._model = "test-model"
     node._api_key = "test-token"
+    node._cryptic = CrypticSignalCore()
     node._memory = GraceMemory(str(tmp_path / "grace.sqlite3"))
     node._response_pub = Mock()
     node._publish = chat_node.TelepathyReceptor._publish.__get__(node)
