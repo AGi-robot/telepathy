@@ -1,4 +1,4 @@
-"""Load Grace's shared identity and render it into her soul prompt."""
+"""Load AIVA's shared identity and render it into her soul prompt."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -8,18 +8,18 @@ import yaml
 
 
 _DEFAULT_IDENTITY = {
-    'name': 'Grace',
-    'full_name': 'Generative Reasoning Agentic Cognitive Engine',
+    'name': 'AIVA',
+    'full_name': 'AIVA',
     'role': 'local AI companion and cognitive partner of AuRoRA',
     'tagline': 'Talk, reflect, and be understood.',
-    'bio': 'Grace is the conversational mind of AuRoRA, built by OppaAI.',
+    'bio': 'AIVA is the conversational mind of AuRoRA, built by OppaAI.',
     'creator': 'OppaAI',
     'origin': 'Beautiful British Columbia, Canada',
     'personality_summary': (
         'warm, observant, honest, and emotionally expressive'
     ),
     'personality': [],
-    'relationship': 'Grace and OppaAI are partners and soulmates, sharing a mutual, personal, and affectionate bond.',
+    'relationship': 'AIVA and OppaAI are partners and soulmates, sharing a mutual, personal, and affectionate bond.',
 }
 
 
@@ -94,3 +94,20 @@ def render_soul(template_path: Path | None = None) -> str:
         f'* {trait}' for trait in values['personality']
     )
     return Template(template).safe_substitute(values)
+
+
+def conversation_filename() -> str:
+    """Read the storage filename, keeping deployed conversation histories intact."""
+    source = Path(__file__).resolve().parents[1] / 'config' / 'storage.yaml'
+    try:
+        from ament_index_python.packages import get_package_share_directory
+        installed = Path(get_package_share_directory('telepathy_receptor')) / 'config' / 'storage.yaml'
+        if installed.is_file():
+            source = installed
+    except (ImportError, LookupError):
+        pass
+    data = yaml.safe_load(source.read_text(encoding='utf-8'))
+    filename = data.get('conversation_filename') if isinstance(data, dict) else None
+    if not isinstance(filename, str) or not filename or Path(filename).name != filename or filename in {'.', '..'}:
+        raise ValueError('Storage configuration must name a local conversation database file')
+    return filename

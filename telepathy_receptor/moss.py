@@ -1,4 +1,4 @@
-"""Thin shim: the painting engine lives in ~/AGi/capability/imaging (pip: grace-imagegen)."""
+"""Thin shim: the painting engine lives in ~/AGi/capability/imaging (pip: aiva-imagegen)."""
 from imagegen import MossClient, MossPaintError, paint_size
 from imagegen.moss import PNG_SIGNATURE
 

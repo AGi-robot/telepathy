@@ -1,4 +1,4 @@
-"""Wire Mind's conversation store into Grace's chat and Canvas context."""
+"""Wire Mind's conversation store into AIVA's chat and Canvas context."""
 from __future__ import annotations
 
 import json
@@ -7,11 +7,11 @@ import re
 from memory.conversation import ConversationStore
 
 
-class GraceMemory(ConversationStore):
-    """Apply Grace's Canvas policies to the shared SQLite conversation store."""
+class AivaMemory(ConversationStore):
+    """Apply AIVA's Canvas policies to the shared SQLite conversation store."""
 
     def __init__(self, database_path: str, max_turns: int = 8) -> None:
-        super().__init__(database_path, max_turns, default_title="Grace chat")
+        super().__init__(database_path, max_turns, default_title="AIVA chat")
         self._initialize_drawing_studies()
 
     def _initialize_drawing_studies(self) -> None:
@@ -48,7 +48,7 @@ class GraceMemory(ConversationStore):
             result = db.execute("UPDATE drawing_studies SET rating=?, notes=? WHERE id=?",
                                 (rating, notes, identifier))
             if not result.rowcount:
-                raise ValueError('Drawing study not found; wait for Grace to finish first')
+                raise ValueError('Drawing study not found; wait for AIVA to finish first')
 
     def drawing_lessons(self, query):
         """Retrieve a few relevant, user-reviewed studies within a small context budget."""

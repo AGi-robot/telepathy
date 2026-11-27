@@ -3,7 +3,7 @@
 <package format="3">
   <name>telepathy_receptor</name>
   <version>0.1.0</version>
-  <description>ROS adapter connecting Grace's Interaction engine to Telepathy and Memory</description>
+  <description>ROS adapter connecting AIVA's Interaction engine to Telepathy and Memory</description>
   <maintainer email="oppa.ai.org@gmail.com">OppaAI</maintainer>
   <license>GPL-3.0-only</license>
   <buildtool_depend>ament_python</buildtool_depend>

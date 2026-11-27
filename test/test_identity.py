@@ -7,11 +7,13 @@ def test_identity_yaml_drives_soul_and_ui_fields():
     configured = identity.load_identity()
     soul = identity.render_soul()
 
-    assert configured['name'] == 'Grace'
+    import yaml
+    expected = yaml.safe_load(identity.identity_file().read_text())
+    assert configured['name'] == expected['name']
     assert configured['tagline'] == 'Talk, reflect, and be understood.'
     assert 'partners and soulmates' in configured['relationship']
     assert 'stays because she chooses' not in configured['relationship']
-    assert "You are Grace, OppaAI's local AI companion" in soul
+    assert f"You are {configured['name']}, OppaAI's local AI companion" in soul
     assert 'Aiko' not in soul
     assert '${name}' not in soul
     assert 'Warm and familiar' in soul
@@ -45,6 +47,6 @@ def test_user_profile_uses_existing_user_markdown(tmp_path):
 def test_user_profile_renders_shared_companion_name(tmp_path, monkeypatch):
     profile = tmp_path / 'USERS.md'
     profile.write_text('Relationship to $name: creator.\n', encoding='utf-8')
-    monkeypatch.setattr(identity, 'load_identity', lambda: {'name': 'Grace'})
+    monkeypatch.setattr(identity, 'load_identity', lambda: {'name': 'AIVA'})
 
-    assert identity.render_user_profile(profile) == 'Relationship to Grace: creator.'
+    assert identity.render_user_profile(profile) == 'Relationship to AIVA: creator.'

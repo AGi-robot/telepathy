@@ -10,7 +10,7 @@ from telepathy_receptor.drawing import (
     repair_model_actions,
 )
 from telepathy_receptor.node import TelepathyReceptor, _append_user_content, _draft_needs_refinement
-from telepathy_receptor.memory import GraceMemory
+from telepathy_receptor.memory import AivaMemory
 from telepathy_receptor.moss import MossPaintError, paint_size
 
 
@@ -59,7 +59,7 @@ def test_drawing_validation_bounds_coordinates_and_preserves_text():
 
 
 def test_letter_format_survives_validation_for_playback_and_later_editing():
-    letter = {'kind': 'letter', 'id': 'note', 'text': 'Dear friend,\n\nHello!\n\nGrace',
+    letter = {'kind': 'letter', 'id': 'note', 'text': 'Dear friend,\n\nHello!\n\nAIVA',
               'x': 270, 'y': 20, 'width': 460, 'height': 610, 'size': 16,
               'margin': 40, 'line_height': 1.5, 'align': 'left'}
     assert validate_actions([letter])[0] == {**letter, 'fill': False}
@@ -108,10 +108,10 @@ def test_model_drawing_tool_is_validated_and_published(tmp_path, monkeypatch):
     node._base_url = 'http://llm.test/v1'
     node._model = 'test'
     node._draw_model = 'swift15-qwen3.8-27b'
-    node._system_prompt = 'You are Grace.'
+    node._system_prompt = 'You are AIVA.'
     node._api_key = ''
     node._draw_timeout = 600
-    node._memory = GraceMemory(str(tmp_path / 'memory.sqlite'))
+    node._memory = AivaMemory(str(tmp_path / 'memory.sqlite'))
     node._memory.add_exchange('My favorite color is coral.', 'I will remember coral.')
     node._publish = Mock()
     node.get_logger = Mock(return_value=Mock())
@@ -147,7 +147,7 @@ def test_model_drawing_tool_is_validated_and_published(tmp_path, monkeypatch):
     assert 'Drawing request: Write hello' in messages[-1]['content']
     assert node._memory.recent()[-2]['content'] == 'Write hello'
     assert node._memory.recent()[-1]['content'].startswith('Here is a hello!')
-    restored = GraceMemory(str(tmp_path / 'memory.sqlite'))
+    restored = AivaMemory(str(tmp_path / 'memory.sqlite'))
     assert restored.recent()[-1]['content'].startswith('Here is a hello!')
     assert 'playback not confirmed' in restored.recent()[-1]['content']
 
@@ -290,10 +290,10 @@ def test_truncated_model_plan_reports_actionable_error_without_painting(tmp_path
     node = TelepathyReceptor.__new__(TelepathyReceptor)
     node._base_url = 'http://llm.test/v1'
     node._model = 'test'
-    node._system_prompt = 'You are Grace.'
+    node._system_prompt = 'You are AIVA.'
     node._api_key = ''
     node._draw_timeout = 600
-    node._memory = GraceMemory(str(tmp_path / 'memory.sqlite'))
+    node._memory = AivaMemory(str(tmp_path / 'memory.sqlite'))
     node._publish = Mock()
     node.get_logger = Mock(return_value=Mock())
     response = Mock(is_error=False)
@@ -335,10 +335,10 @@ def test_oversized_pass_stops_at_budget_and_remembers_already_streamed_actions(t
     node = TelepathyReceptor.__new__(TelepathyReceptor)
     node._base_url = 'http://llm.test/v1'
     node._model = 'test'
-    node._system_prompt = 'You are Grace.'
+    node._system_prompt = 'You are AIVA.'
     node._api_key = ''
     node._draw_timeout = 600
-    node._memory = GraceMemory(str(tmp_path / 'memory.sqlite'))
+    node._memory = AivaMemory(str(tmp_path / 'memory.sqlite'))
     node._publish = Mock()
     node.get_logger = Mock(return_value=Mock())
     response = Mock(is_error=False)
@@ -360,10 +360,10 @@ def test_oversized_pass_stops_at_budget_and_remembers_already_streamed_actions(t
 
 def drawing_node(tmp_path):
     node = TelepathyReceptor.__new__(TelepathyReceptor)
-    node._base_url, node._model, node._system_prompt = 'http://llm.test/v1', 'test', 'Grace'
+    node._base_url, node._model, node._system_prompt = 'http://llm.test/v1', 'test', 'AIVA'
     node._draw_model, node._draw_max_tokens = 'swift15-qwen3.8-27b', 6144
     node._api_key, node._draw_timeout = '', 600
-    node._memory = GraceMemory(str(tmp_path / 'memory.sqlite'))
+    node._memory = AivaMemory(str(tmp_path / 'memory.sqlite'))
     node._publish = Mock()
     node.get_logger = Mock(return_value=Mock())
     node._snapshots, node._snapshot_timeout, node._vision_ok = {}, 0.5, True
@@ -619,7 +619,7 @@ def test_paint_action_generates_and_publishes_a_canvas_image(tmp_path, monkeypat
     assert '"kind":"image"' in canvas_context(
         [action for call in node._publish.call_args_list
          for action in call.args[0].get('actions', []) if action.get('kind') == 'ellipse'] + [
-            {'id': 'grace-x', 'kind': 'image', 'prompt': 'a sunny meadow', 'x': 100, 'y': 80}])
+            {'id': 'aiva-x', 'kind': 'image', 'prompt': 'a sunny meadow', 'x': 100, 'y': 80}])
 
 
 def test_paint_unavailable_drops_image_actions(tmp_path, monkeypatch):

@@ -1,0 +1,2 @@
+# Retain the established conversation database during the code naming migration.
+conversation_filename: grace_memory.sqlite3
