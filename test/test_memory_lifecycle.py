@@ -3,11 +3,11 @@ import sqlite3
 
 import pytest
 
-from telepathy_receptor.memory import GraceMemory
+from telepathy_receptor.memory import AivaMemory
 
 
 def test_transactions_close_and_rollback_without_partial_exchange(tmp_path):
-    memory = GraceMemory(str(tmp_path / 'chat.sqlite'))
+    memory = AivaMemory(str(tmp_path / 'chat.sqlite'))
     with memory._connect() as connection:
         connection.execute("INSERT INTO conversations(id,title) VALUES ('saved','Saved')")
     with pytest.raises(sqlite3.ProgrammingError):

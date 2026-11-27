@@ -30,7 +30,7 @@ class FakeStreamingResponse:
         return None
 
     def iter_lines(self):
-        yield 'data: {"choices":[{"delta":{"content":"Grace replied"}}]}'
+        yield 'data: {"choices":[{"delta":{"content":"AIVA replied"}}]}'
         yield "data: [DONE]"
 
 
@@ -79,7 +79,7 @@ def test_chat_input_topics_and_response_topic_on_ros_graph(tmp_path, monkeypatch
         assert node.count_subscribers("/telepathic/stimulus") > 0
         assert node.count_subscribers("/aiva/chat_input") == 0
         signal = TelepathicSignal()
-        signal.channel = "grace"
+        signal.channel = "aiva"
         signal.scheme = "ternary_utf8_v1"
         encoded, signal.pulse = node._cryptic.encode("radio hello")
         signal.signal = list(encoded)
@@ -96,7 +96,7 @@ def test_chat_input_topics_and_response_topic_on_ros_graph(tmp_path, monkeypatch
         assert response_events[-1]["radio_id"] == "response-3"
         assert node._memory.recent() == [
             {"role": "user", "content": "hello"},
-            {"role": "assistant", "content": "Grace replied"},
+            {"role": "assistant", "content": "AIVA replied"},
         ]
     finally:
         node.destroy_node()

@@ -1,6 +1,6 @@
-"""Thin shim: the drawing language lives in ~/AGi/capability/canvas (pip: grace-canvas).
+"""Thin shim: the drawing language lives in ~/AGi/capability/canvas (pip: aiva-canvas).
 
-Raster painting ('image' actions) is registered by grace-imagegen from
+Raster painting ('image' actions) is registered by aiva-imagegen from
 ~/AGi/capability/imaging.
 Re-exports keep `telepathy_receptor.node` and the existing tests working unchanged.
 """

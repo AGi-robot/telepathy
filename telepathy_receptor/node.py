@@ -21,8 +21,8 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from ament_index_python.packages import get_package_share_directory
 
-from .identity import load_identity, render_soul, render_user_profile, user_profile_file
-from .memory import GraceMemory
+from .identity import conversation_filename, load_identity, render_soul, render_user_profile, user_profile_file
+from .memory import AivaMemory
 from .moss import MossClient, paint_size
 from .drawing import (DRAW_INSTRUCTIONS, PAINT_INSTRUCTIONS, validate_actions,
                       canvas_context, drawing_history, drawing_summary,
@@ -115,7 +115,7 @@ class TelepathyReceptor(Node):
         self.declare_parameter("agi_home", os.getenv("AGI_HOME", "~/.agi"))
         default_memory_path = (
             Path(str(self.get_parameter("agi_home").value)).expanduser()
-            / "profile" / "grace_memory.sqlite3"
+            / "profile" / conversation_filename()
         )
         self.declare_parameter("memory_path", os.getenv("AIVA_MEMORY_PATH", str(default_memory_path)))
         self.declare_parameter("memory_turns", 4)
@@ -139,7 +139,7 @@ class TelepathyReceptor(Node):
                 f"{user_profile}"
             )
         memory_path = str(self.get_parameter("memory_path").value)
-        self._memory = GraceMemory(memory_path, int(self.get_parameter("memory_turns").value))
+        self._memory = AivaMemory(memory_path, int(self.get_parameter("memory_turns").value))
         self._cryptic = CrypticSignalCore()
         self._api_key = os.getenv("AIVA_LLM_API_KEY", "")
         self._draw_timeout = float(os.getenv("AIVA_DRAW_TIMEOUT_SECONDS", "600"))
@@ -276,10 +276,8 @@ class TelepathyReceptor(Node):
             f"Received TelepathicSignal on chat input (channel={signal.channel!r}, "
             f"scheme={signal.scheme!r}, id={signal.identifier})"
         )
-        # Older WebUI deployments use the legacy `grace` channel. It is still
-        # a direct user-to-Grace chat signal, so accept it alongside AIVA's
-        # newer explicit channel names.
-        if signal.channel not in {"aiva", "agi", "grace", ""}:
+        # Only supported chat destinations enter the conversation engine.
+        if signal.channel not in {"aiva", "agi", ""}:
             self.get_logger().info(f"Ignoring non-chat channel {signal.channel!r}")
             return
         try:
@@ -342,7 +340,7 @@ class TelepathyReceptor(Node):
         placement_h = action.get('height') or 512
         generation_w, generation_h = paint_size(placement_w, placement_h)
         self._publish({"type": "canvas_progress", "identifier": identifier,
-                       "content": "Grace is generating your painting…"})
+                       "content": "AIVA is generating your painting…"})
         png = self._paint.generate(str(action.get('prompt', '')), generation_w, generation_h)
         self._publish({
             "type": "canvas_image", "identifier": identifier, "id": action.get('id', ''),
@@ -430,14 +428,14 @@ class TelepathyReceptor(Node):
                 messages = list(base_messages)
                 if pass_index:
                     self._publish({"type": "canvas_progress", "identifier": identifier,
-                                   "content": f"Grace is refining her drawing · pass {pass_index + 1} / 4"})
+                                   "content": f"AIVA is refining her drawing · pass {pass_index + 1} / 4"})
                     observed = None
                     if wants_vision and getattr(self, "_vision_ok", True) is not False:
                         observed = self._await_snapshot(identifier)
                         if reference and not observed:
                             raise RuntimeError('The canvas screenshot did not arrive. Reload Canvas to continue reference-guided drawing.')
                     # The newest render is authoritative. Remove the initial screenshot so
-                    # Grace is not comparing the current draft with a stale canvas image.
+                    # AIVA is not comparing the current draft with a stale canvas image.
                     messages = self._strip_images(messages)
                     scene = CanvasScene()
                     for action in [*objects, *prepared]:
@@ -489,7 +487,7 @@ class TelepathyReceptor(Node):
                 if not more and not needs_visual_review and not quality_incomplete:
                     break
             if not prepared:
-                raise ValueError("Grace could not produce a complete drawing action. Try a simpler composition.")
+                raise ValueError("AIVA could not produce a complete drawing action. Try a simpler composition.")
             if not objects and not allow_canvas_text and _draft_needs_refinement(prepared, reply):
                 more = True
                 reply = "I made a partial draft, but it still needs a stronger silhouette and painted detail."
@@ -535,7 +533,7 @@ class TelepathyReceptor(Node):
         def publish_new(actions):
             nonlocal last_target_id, seen_count, paint_count
             if len(actions) > action_limit:
-                raise ValueError(f"Grace exceeded the {action_limit}-action pass budget. Ask for a smaller detail.")
+                raise ValueError(f"AIVA exceeded the {action_limit}-action pass budget. Ask for a smaller detail.")
             unseen = actions[seen_count:]
             seen_count = len(actions)
             if not allow_canvas_text:
@@ -553,7 +551,7 @@ class TelepathyReceptor(Node):
                     # resolve the intended target.
                     action['id'] = last_target_id
                 if action['kind'] not in (*target_kinds, 'clear', 'undo', 'redo'):
-                    action.setdefault('id', 'grace-' + uuid4().hex)
+                    action.setdefault('id', 'aiva-' + uuid4().hex)
                     last_target_id = action['id']
                 elif action.get('id'):
                     last_target_id = action['id']
